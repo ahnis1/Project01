@@ -1,21 +1,18 @@
-# From base image node
-FROM node:16
+FROM php:7.4-apache
 
-# Create app directory
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+# Set working directory for the application
+WORKDIR /var/www/html/
 
-# Copying all the files from your file system to container file system
-COPY package.json .
+# Copy the application files to the working directory
+COPY . .
 
-# Install all dependencies
-RUN npm install
+# Install required packages
+RUN apt-get update && \
+    apt-get install -y git && \
+    docker-php-ext-install pdo_mysql
 
-# Copy other files too
-COPY ./ .
+# Expose port 80 for HTTP traffic
+EXPOSE 80
 
-# Expose the port
-EXPOSE 3030
-
-# Command to run app when intantiate an image
-CMD ["npm","start"]
+# Start Apache web server on container startup
+CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
